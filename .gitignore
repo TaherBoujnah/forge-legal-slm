@@ -1,0 +1,19 @@
+# AI Models & Weights (CRITICAL: Do not push 1.8GB files to GitHub)
+*.gguf
+*.bin
+*.pt
+models/
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+# OS Files
+.DS_Store
+Thumbs.db
