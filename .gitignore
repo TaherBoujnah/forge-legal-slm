@@ -4,6 +4,10 @@ Virtual Environments
 venv/
 env/
 
+IDEs / Editors
+
+.vscode/
+
 Python Cache
 
 pycache/
@@ -33,3 +37,10 @@ OS Files
 
 .DS_Store
 Thumbs.db
+
+Terraform
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
