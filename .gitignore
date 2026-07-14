@@ -1,19 +1,35 @@
-# AI Models & Weights (CRITICAL: Do not push 1.8GB files to GitHub)
-*.gguf
-*.bin
-*.pt
-models/
-outputs/
+Virtual Environments
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
 .venv/
 venv/
 env/
-.env
 
-# OS Files
+Python Cache
+
+pycache/
+*.pyc
+*.pyo
+
+Model Weights and Checkpoints (CRITICAL: Prevents GitHub 100MB limit crash)
+
+models/
+outputs/
+outputs_hf_native/
+outputs_stable/
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.msgpack
+
+Data & Evaluation
+
+data/
+*.jsonl
+eval_results.json
+debug_log.txt
+
+OS Files
+
 .DS_Store
 Thumbs.db

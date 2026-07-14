@@ -1,4 +1,8 @@
-openai
+# --- Inference & Web App (app.py) ---
+gradio==4.36.1
+pymupdf==1.24.5
+llama-cpp-python==0.2.79
+
+# --- Data Generation (synthetic-data-generator.py) ---
+ollama
 pydantic
-asyncio
-python-dotenv
