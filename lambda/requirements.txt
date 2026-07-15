@@ -1,0 +1,8 @@
+boto31.34.131
+pymupdf1.24.5
+
+We must compile llama-cpp-python from source in the Docker container
+
+to ensure it builds correctly for the AWS Lambda Linux architecture.
+
+llama-cpp-python==0.2.79
