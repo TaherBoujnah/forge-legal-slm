@@ -1,7 +1,40 @@
-# ... existing code ...
+provider "aws" {
+  region = "eu-central-1"
+}
+
+# Generate a random string for unique bucket names
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}
+
+# ==================================================
+# PHASE 1: ECR REPOSITORY (Docker Image)
+# ==================================================
+resource "aws_ecr_repository" "lambda_inference_repo" {
+  name                 = "forge-legal-slm-inference"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
+}
+
+# ==================================================
+# PHASE 2: S3 BUCKET (Model Artifacts / GGUF)
+# ==================================================
+resource "aws_s3_bucket" "model_artifacts" {
+  bucket        = "forge-legal-slm-artifacts-${random_id.bucket_suffix.hex}"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "model_artifacts_privacy" {
+  bucket                  = aws_s3_bucket.model_artifacts.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 output "ecr_repository_url" {
-description = "The URL to push your Docker container to"
-value       = aws_ecr_repository.lambda_inference_repo.repository_url
+  description = "The URL to push your Docker container to"
+  value       = aws_ecr_repository.lambda_inference_repo.repository_url
 }
 
 # ==================================================
@@ -91,7 +124,8 @@ resource "aws_lambda_permission" "apigw" {
 
 # 5. S3 Bucket for Static Website Hosting (The Frontend)
 resource "aws_s3_bucket" "frontend" {
-  bucket = "forge-legal-slm-frontend-${random_id.bucket_suffix.hex}"
+  bucket        = "forge-legal-slm-frontend-${random_id.bucket_suffix.hex}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_website_configuration" "frontend" {
