@@ -1,17 +1,12 @@
 # Use the official AWS Lambda Python 3.10 base image
 FROM public.ecr.aws/lambda/python:3.10
 
-# Install C++ compilers and build tools required to compile llama.cpp natively
-RUN yum update -y && \
-    yum groupinstall -y "Development Tools" && \
-    yum install -y gcc-c++ make
-
 # Copy requirements file
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
-# Install Python dependencies
-# CMAKE_ARGS allows llama-cpp-python to compile optimized for CPU
-RUN CMAKE_ARGS="-DLLAMA_BLAS=OFF -DLLAMA_CUBLAS=OFF" pip install -r requirements.txt
+# THE FIX: Download the pre-compiled CPU wheel instead of building from source!
+# This skips C++ compilation, preventing the "no space left on device" error.
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 
 # Copy our function code
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}

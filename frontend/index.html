@@ -3,168 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forge | Legal SLM Extraction Engine</title>
+    <title>Contractor.io | AI Legal Extraction</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                            '50%': { opacity: .7, transform: 'scale(1.05)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .font-mono { font-family: 'Fira Code', monospace; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        body { 
+            background-color: #030303; 
+            color: #f8fafc; 
+            overflow-x: hidden;
+        }
         
-        .json-key { color: #7dd3fc; } 
-        .json-string { color: #a7f3d0; } 
-        .json-number { color: #fde047; } 
-        .json-boolean { color: #fca5a5; } 
-        .json-null { color: #94a3b8; } 
+        /* Premium Grid Background */
+        .bg-grid-pattern {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 0%, black 10%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at 50% 0%, black 10%, transparent 80%);
+            z-index: -1;
+            pointer-events: none;
+        }
 
+        /* Ambient Glow */
+        .ambient-glow {
+            position: fixed;
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0,0,0,0) 70%);
+            filter: blur(40px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Glass Panel Styling */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* Drag & Drop Active State */
+        .drag-active { 
+            border-color: #3b82f6 !important; 
+            background-color: rgba(59, 130, 246, 0.05) !important; 
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2) inset;
+        }
+
+        /* Status Dot */
         .status-dot {
-            height: 10px; width: 10px; background-color: #10b981; border-radius: 50%; display: inline-block;
-            box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;
+            height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8); 
+            animation: pulseGlow 2s infinite;
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .drag-active { border-color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1) !important; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+<body class="min-h-screen flex flex-col relative antialiased selection:bg-brand-500 selection:text-white">
 
-    <div class="w-full max-w-7xl mx-auto space-y-6">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-6">
-            <div>
-                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 flex items-center gap-3">
-                    <i data-lucide="anvil" class="w-8 h-8 text-blue-400"></i> Forge Enterprise
-                </h1>
-                <p class="text-slate-400 text-sm mt-1">Automated Multi-Page PDF Extraction Pipeline</p>
-            </div>
-            <div class="mt-4 md:mt-0 flex items-center gap-4 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
-                <div class="flex items-center gap-2">
-                    <span class="status-dot"></span>
-                    <span class="text-sm text-slate-300 font-medium">Python Backend Online</span>
+    <!-- Background Elements -->
+    <div class="bg-grid-pattern"></div>
+    <div class="ambient-glow"></div>
+
+    <!-- Floating Navbar -->
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-black/40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-indigo-600 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:shadow-[0_0_25px_rgba(59,130,246,0.6)] transition-all">
+                    <i data-lucide="scale" class="w-4 h-4 text-white"></i>
                 </div>
-                <div class="h-4 w-px bg-slate-600"></div>
-                <span class="text-xs font-mono text-slate-400">Port 7860</span>
+                <span class="text-xl font-bold tracking-tight text-white">Contractor<span class="text-brand-400">.io</span></span>
             </div>
-        </header>
-
-        <!-- Main Workspace -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- Left Column: Input & Upload -->
-            <div class="flex flex-col h-full gap-4">
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-slate-300">
+                    <span class="status-dot"></span>
+                    Engine: <span class="text-white">SLM-v1</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 pt-28 pb-12 flex flex-col">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-10 space-y-4">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
+                Extract Intelligence from <br class="hidden md:block"/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-indigo-400">Complex Legal Contracts</span>
+            </h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+                Upload NDAs, MSAs, or Lease Agreements. Our fine-tuned Small Language Model (SLM) deterministically extracts entities, dates, and financial caps into clean JSON.
+            </p>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+            
+            <!-- LEFT COLUMN: INPUT -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
                 
-                <!-- File Upload Zone -->
-                <div id="dropzone" class="w-full border-2 border-dashed border-slate-600 rounded-xl bg-slate-900/50 p-6 flex flex-col items-center justify-center text-center transition-all hover:bg-slate-800/50 hover:border-slate-500 cursor-pointer">
-                    <input type="file" id="file-upload" class="hidden" accept=".pdf" />
-                    <div class="bg-blue-900/30 p-3 rounded-full mb-3">
-                        <i data-lucide="cloud-upload" class="w-6 h-6 text-blue-400"></i>
+                <!-- Upload Zone -->
+                <div class="glass-panel rounded-2xl p-1">
+                    <div id="dropzone" class="w-full border border-dashed border-white/20 rounded-xl bg-black/20 p-8 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-brand-500/50 hover:bg-white/[0.02] cursor-pointer group relative overflow-hidden">
+                        
+                        <!-- Hover Gradient effect -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        
+                        <input type="file" id="file-upload" class="hidden" accept=".pdf" />
+                        
+                        <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-brand-500/30 transition-transform duration-300 shadow-lg relative">
+                            <i data-lucide="file-up" class="w-6 h-6 text-brand-400"></i>
+                        </div>
+                        
+                        <h3 class="text-base font-semibold text-white mb-1" id="file-name-display">Upload PDF Document</h3>
+                        <p class="text-xs text-slate-400 max-w-[200px]">Drag and drop your file here, or click to browse files.</p>
                     </div>
-                    <p class="text-sm font-medium text-slate-300 mb-1" id="file-name-display">Click to upload or drag and drop a PDF</p>
-                    <p class="text-xs text-slate-500">Backend handles text extraction & LLM chunking</p>
                 </div>
 
-                <div class="flex items-center justify-between mt-2">
-                    <label class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                        <i data-lucide="file-text" class="w-4 h-4"></i> Document Status
-                    </label>
+                <!-- Text Preview -->
+                <div class="glass-panel rounded-2xl flex flex-col flex-1 min-h-[250px] overflow-hidden">
+                    <div class="px-4 py-3 border-b border-white/5 flex items-center gap-2 bg-white/[0.01]">
+                        <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Document Buffer</span>
+                    </div>
+                    <textarea id="raw-text" class="w-full flex-1 bg-transparent p-4 text-xs font-mono text-slate-400 focus:outline-none resize-none leading-relaxed" placeholder="Awaiting document upload..." readonly></textarea>
                 </div>
-                <textarea id="raw-text" class="w-full flex-1 min-h-[300px] bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none leading-relaxed" placeholder="Upload a PDF above to begin..." readonly></textarea>
                 
-                <button id="extract-btn" onclick="extractData()" class="mt-2 w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i data-lucide="cpu" class="w-5 h-5"></i>
-                    <span>Run Neural Pipeline</span>
+                <!-- Action Button -->
+                <button id="extract-btn" onclick="extractData()" class="relative w-full bg-white text-black font-semibold py-4 px-6 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-brand-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <i data-lucide="cpu" class="w-5 h-5 relative z-10"></i>
+                    <span class="relative z-10">Execute Neural Pipeline</span>
                 </button>
             </div>
 
-            <!-- Right Column: Output -->
-            <div class="flex flex-col h-full">
-                <div class="flex items-center justify-between mb-2">
-                    <label class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                        <i data-lucide="file-check-2" class="w-4 h-4"></i> Extracted Contract Data
-                    </label>
-                    <button onclick="copyJson()" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1" id="copy-btn">
-                        <i data-lucide="copy" class="w-3 h-3"></i> Copy Raw JSON
-                    </button>
-                </div>
-                
-                <div class="relative w-full flex-1 min-h-[400px] bg-[#0a0a0a] border border-slate-700 rounded-xl flex flex-col overflow-hidden">
+            <!-- RIGHT COLUMN: OUTPUT -->
+            <div class="lg:col-span-7 flex flex-col h-full">
+                <div class="glass-panel rounded-2xl flex flex-col h-full relative overflow-hidden shadow-2xl">
                     
-                    <!-- Loading Overlay -->
-                    <div id="loading-overlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center z-10">
-                        <i data-lucide="loader-2" class="w-8 h-8 text-blue-500 animate-spin mb-4"></i>
-                        <p id="loading-text" class="text-blue-400 text-sm font-mono animate-pulse">Uploading to Python Server...</p>
-                        <p class="text-slate-500 text-xs font-mono mt-2" id="loading-subtext">Initializing pipeline</p>
-                    </div>
-
-                    <!-- Placeholder Area -->
-                    <div id="placeholder-container" class="flex-1 flex flex-col items-center justify-center text-slate-500 p-8 text-center">
-                        <i data-lucide="file-search" class="w-12 h-12 mb-3 opacity-40"></i>
-                        <p class="text-sm">Upload a document and run the pipeline to view extracted entities here.</p>
-                    </div>
-
-                    <!-- Parsed Results Container (Hidden by default) -->
-                    <div id="results-container" class="hidden flex-1 overflow-y-auto p-6 space-y-6">
-                        <!-- Parties -->
-                        <div>
-                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                <i data-lucide="users" class="w-4 h-4 text-blue-400"></i> Contracting Parties
-                            </h3>
-                            <div id="out-parties" class="flex flex-wrap gap-2"></div>
+                    <!-- Header -->
+                    <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="braces" class="w-4 h-4 text-brand-400"></i>
+                            <span class="text-sm font-semibold uppercase tracking-wider text-slate-200">Structured Output</span>
                         </div>
+                        <button onclick="copyJson()" class="text-xs font-medium text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2" id="copy-btn">
+                            <i data-lucide="copy" class="w-3 h-3"></i> Copy JSON
+                        </button>
+                    </div>
+                    
+                    <!-- Content Area -->
+                    <div class="relative flex-1 min-h-[400px] bg-[#050505]/50">
                         
-                        <!-- Effective Date -->
-                        <div>
-                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i> Effective Date
-                            </h3>
-                            <p id="out-date" class="text-slate-200 text-sm bg-slate-800/50 border border-slate-700 rounded-lg p-3"></p>
+                        <!-- Loading Overlay -->
+                        <div id="loading-overlay" class="absolute inset-0 bg-[#050505]/80 backdrop-blur-md hidden flex-col items-center justify-center z-20">
+                            <div class="relative w-16 h-16 mb-6">
+                                <div class="absolute inset-0 rounded-full border-t-2 border-brand-500 animate-spin"></div>
+                                <div class="absolute inset-2 rounded-full border-r-2 border-indigo-400 animate-[spin_2s_linear_reverse_infinite]"></div>
+                                <i data-lucide="brain" class="absolute inset-0 m-auto w-6 h-6 text-brand-400 animate-pulse"></i>
+                            </div>
+                            <p id="loading-text" class="text-white font-medium mb-1">Parsing Document</p>
+                            <p id="loading-subtext" class="text-slate-400 text-xs font-mono">Initializing vector engine...</p>
                         </div>
 
-                        <!-- Liability Cap -->
-                        <div>
-                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Liability Cap
-                            </h3>
-                            <p id="out-liability" class="text-slate-200 text-sm bg-slate-800/50 border border-slate-700 rounded-lg p-3"></p>
+                        <!-- Empty State -->
+                        <div id="placeholder-container" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-8 text-center">
+                            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/5">
+                                <i data-lucide="scan-line" class="w-8 h-8 text-slate-600"></i>
+                            </div>
+                            <h4 class="text-slate-300 font-medium mb-1">No Data Extracted Yet</h4>
+                            <p class="text-sm text-slate-500 max-w-sm">Upload a contract and execute the pipeline to generate a structured JSON payload.</p>
                         </div>
 
-                        <!-- Termination Conditions -->
-                        <div>
-                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <i data-lucide="file-x" class="w-4 h-4 text-rose-400"></i> Termination Conditions
-                            </h3>
-                            <p id="out-termination" class="text-slate-200 text-sm bg-slate-800/50 border border-slate-700 rounded-lg p-3 leading-relaxed"></p>
+                        <!-- Results (Hidden initially) -->
+                        <div id="results-container" class="hidden absolute inset-0 overflow-y-auto p-6 space-y-6">
+                            
+                            <!-- Parties Card -->
+                            <div class="glass-panel p-5 rounded-xl border-l-2 border-l-brand-500">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <i data-lucide="users" class="w-4 h-4 text-brand-400"></i> Contracting Parties
+                                </h3>
+                                <div id="out-parties" class="flex flex-wrap gap-2"></div>
+                            </div>
+                            
+                            <!-- Grid for smaller metrics -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Effective Date -->
+                                <div class="glass-panel p-5 rounded-xl border-t border-white/5 relative overflow-hidden group hover:bg-white/[0.04] transition-colors">
+                                    <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i> Effective Date
+                                    </h3>
+                                    <p id="out-date" class="text-slate-200 text-sm font-medium"></p>
+                                </div>
+
+                                <!-- Liability Cap -->
+                                <div class="glass-panel p-5 rounded-xl border-t border-white/5 relative overflow-hidden group hover:bg-white/[0.04] transition-colors">
+                                    <div class="absolute top-0 right-0 w-16 h-16 bg-amber-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Liability Cap
+                                    </h3>
+                                    <p id="out-liability" class="text-slate-200 text-sm font-medium"></p>
+                                </div>
+                            </div>
+
+                            <!-- Termination Conditions -->
+                            <div class="glass-panel p-5 rounded-xl border-t border-white/5 relative overflow-hidden group hover:bg-white/[0.04] transition-colors">
+                                <div class="absolute top-0 right-0 w-16 h-16 bg-rose-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <i data-lucide="file-x" class="w-4 h-4 text-rose-400"></i> Termination Conditions
+                                </h3>
+                                <p id="out-termination" class="text-slate-300 text-sm leading-relaxed"></p>
+                            </div>
+
                         </div>
                     </div>
                     
                     <!-- Telemetry Footer -->
-                    <div class="bg-slate-800 border-t border-slate-700 px-4 py-3 flex justify-between items-center text-xs font-mono text-slate-400">
-                        <div class="flex items-center gap-4">
-                            <span title="Total processing time">⏱️ Latency: <span id="metric-latency" class="text-white">--</span></span>
-                            <span title="Pages Processed">📄 Pages: <span id="metric-pages" class="text-white">--</span></span>
+                    <div class="border-t border-white/5 bg-black/40 px-5 py-3 flex justify-between items-center text-xs font-mono text-slate-500 backdrop-blur-md">
+                        <div class="flex items-center gap-6">
+                            <span class="flex items-center gap-2" title="Total processing time">
+                                <i data-lucide="timer" class="w-3 h-3"></i>
+                                Latency: <span id="metric-latency" class="text-slate-300">--</span>
+                            </span>
+                            <span class="flex items-center gap-2" title="Pages Processed">
+                                <i data-lucide="layers" class="w-3 h-3"></i>
+                                Pages: <span id="metric-pages" class="text-slate-300">--</span>
+                            </span>
                         </div>
-                        <div>
-                            <span>Model: <span class="text-blue-400">forge-legal-slm</span></span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-brand-500"></div>
+                            VRAM: Optimized
                         </div>
                     </div>
                 </div>
             </div>
 
         </div>
-    </div>
+    </main>
 
     <script>
-        lucide.createIcons();
-
+        // 1. Move variable declarations to the very top so they initialize before anything else
         let lastExtractedJson = null;
-
+        let selectedFile = null;
+        
         const extractBtn = document.getElementById('extract-btn');
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
@@ -182,7 +320,13 @@
         
         const dropzone = document.getElementById('dropzone');
         const fileUpload = document.getElementById('file-upload');
-        let selectedFile = null;
+
+        // 2. Wrap icon loading in a try/catch
+        try {
+            lucide.createIcons();
+        } catch (e) {
+            console.warn("Icons failed to load, but the app will continue functioning.", e);
+        }
 
         dropzone.addEventListener('click', () => fileUpload.click());
 
@@ -211,8 +355,8 @@
                 return;
             }
             
-            fileNameDisplay.innerHTML = `<span class="text-blue-400 font-bold">${selectedFile.name}</span> selected.`;
-            document.getElementById('raw-text').value = `[Binary PDF Data Hidden]\n\nFile size: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB\n\nReady to send to Python API for text extraction and SLM chunking.`;
+            fileNameDisplay.innerHTML = `<span class="text-brand-400 font-semibold">${selectedFile.name}</span>`;
+            document.getElementById('raw-text').value = `[System] Secure PDF Upload Intercepted.\n\nFile Name: ${selectedFile.name}\nFile Size: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB\nType: ${selectedFile.type}\n\n[Status] Awaiting neural extraction initialization...`;
             
             // Reset UI
             placeholderContainer.classList.remove('hidden');
@@ -224,17 +368,20 @@
             if (!selectedFile) return alert("Please upload a PDF file first.");
 
             extractBtn.disabled = true;
+            extractBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...`;
+            try { lucide.createIcons(); } catch(e) {}
+
             loadingOverlay.classList.remove('hidden');
             loadingOverlay.classList.add('flex');
             
-            loadingText.innerText = "Parsing PDF...";
-            loadingSubtext.innerText = "Extracting text and chunking...";
+            loadingText.innerText = "Parsing PDF Structure";
+            loadingSubtext.innerText = "Extracting text and identifying boundaries...";
             metricLatency.innerText = "--";
             metricPages.innerText = "--";
 
             setTimeout(() => {
-                loadingText.innerText = "Executing Neural Inference...";
-                loadingSubtext.innerText = "Processing chunks sequentially through the SLM...";
+                loadingText.innerText = "Executing Neural Inference";
+                loadingSubtext.innerText = "Streaming chunks through Llama-3 3B SLM...";
             }, 1500);
 
             const startTime = performance.now();
@@ -242,9 +389,8 @@
             formData.append("file", selectedFile);
 
             try {
-                // Ensure this matches the port your Python FastAPI is running on (7860)
-                // When you deploy to HuggingFace, change this URL to your HuggingFace URL!
-                const response = await fetch('http://localhost:7860/process-document', {
+                // Pointing to your deployed AWS API Gateway
+                const response = await fetch('https://jav7s5d153.execute-api.eu-central-1.amazonaws.com/process-document', {
                     method: 'POST',
                     body: formData
                 });
@@ -264,10 +410,10 @@
                 // 1. Render Parties Badges
                 if (lastExtractedJson.parties && lastExtractedJson.parties.length > 0) {
                     outParties.innerHTML = lastExtractedJson.parties.map(p => 
-                        `<span class="bg-blue-900/50 text-blue-300 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-700/50">${p}</span>`
+                        `<span class="bg-brand-500/10 text-brand-300 px-3 py-1 rounded-md text-sm font-medium border border-brand-500/20 shadow-sm">${p}</span>`
                     ).join('');
                 } else {
-                    outParties.innerHTML = `<span class="text-slate-500 italic">Not Specified</span>`;
+                    outParties.innerHTML = `<span class="text-slate-500 italic text-sm">Not Specified</span>`;
                 }
 
                 // 2. Render Text Fields
@@ -283,9 +429,12 @@
                 console.error(error);
                 placeholderContainer.classList.add('hidden');
                 resultsContainer.classList.remove('hidden');
-                resultsContainer.innerHTML = `<div class="text-red-400 p-4 bg-red-900/20 rounded-lg border border-red-800/50"><b>Connection Error:</b> Ensure the Python server is running locally on port 7860.<br><br>Check your terminal running 'python main.py' to see if the model loaded correctly.</div>`;
+                resultsContainer.innerHTML = `<div class="text-rose-400 p-5 bg-rose-950/30 rounded-xl border border-rose-900/50 backdrop-blur-sm"><b class="flex items-center gap-2 mb-2"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Connection Error</b>Ensure the cloud server is running and CORS is configured correctly.</div>`;
+                try { lucide.createIcons(); } catch(e) {}
             } finally {
                 extractBtn.disabled = false;
+                extractBtn.innerHTML = `<div class="absolute inset-0 bg-gradient-to-r from-brand-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity"></div><i data-lucide="cpu" class="w-5 h-5 relative z-10"></i><span class="relative z-10">Execute Neural Pipeline</span>`;
+                try { lucide.createIcons(); } catch(e) {}
                 loadingOverlay.classList.add('hidden');
                 loadingOverlay.classList.remove('flex');
             }
@@ -298,9 +447,9 @@
             
             const btn = document.getElementById('copy-btn');
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> <span class="text-emerald-400">Copied</span>`;
-            lucide.createIcons();
-            setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons(); }, 2000);
+            btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> <span class="text-emerald-400">Copied Payload</span>`;
+            try { lucide.createIcons(); } catch(e) {}
+            setTimeout(() => { btn.innerHTML = originalHtml; try { lucide.createIcons(); } catch(e) {} }, 2000);
         }
     </script>
 </body>
