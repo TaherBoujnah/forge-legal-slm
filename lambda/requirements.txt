@@ -1,4 +1,4 @@
-
-boto31.34.131
-pymupdf1.24.5
-llama-cpp-python==0.2.79
+boto3==1.34.131
+pymupdf==1.24.5
+llama-cpp-python==0.3.2
+ 
