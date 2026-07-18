@@ -2,7 +2,10 @@
 FROM public.ecr.aws/lambda/python:3.10
 
 # THE FIX: Install the missing GNU OpenMP system library required by llama.cpp
-RUN yum install -y libgomp
+
+RUN dnf install -y libgomp && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf
 
 # Copy requirements file
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
