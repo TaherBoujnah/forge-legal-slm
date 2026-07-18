@@ -72,6 +72,7 @@ def lambda_handler(event, context):
     # This will print the keys and structure of the event to CloudWatch
      print(f"EVENT STRUCTURE: {json.dumps(list(event.keys()))}")
      print(f"DEBUG_EVENT_DATA: {json.dumps(event)}")
+     print(f"DEBUG_EVENT_DATA: {json.dumps(event)[:500]}")
     # Also print the first 100 bytes of the body if it exists
      if 'body' in event:
         print(f"BODY START: {str(event['body'])[:100]}")
