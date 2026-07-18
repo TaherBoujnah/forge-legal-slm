@@ -67,6 +67,16 @@ def lambda_handler(event, context):
     Main entry point for AWS Lambda / API Gateway.
     """
     print("Incoming request received.")
+
+    def lambda_handler(event, context):
+    # This will print the keys and structure of the event to CloudWatch
+     print(f"EVENT STRUCTURE: {json.dumps(list(event.keys()))}")
+
+    # Also print the first 100 bytes of the body if it exists
+     if 'body' in event:
+        print(f"BODY START: {str(event['body'])[:100]}")
+    
+    # ... keep your existing logic below ...
     
     # 1. CORS Preflight check
     if event.get('httpMethod') == 'OPTIONS':
